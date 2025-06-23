@@ -1,5 +1,5 @@
 {
-  "name": "twitter-clone",
+  "name": "nwitter-clone",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -11,12 +11,16 @@
   },
   "dependencies": {
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^6.14.2",
+    "styled-components": "^6.0.7",
+    "styled-reset": "^4.5.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
+    "@types/styled-components": "^5.1.34",
     "@vitejs/plugin-react-swc": "^3.9.0",
     "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",
