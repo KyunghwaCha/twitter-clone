@@ -2,6 +2,7 @@ import { useState } from "react";
 import styled from "styled-components";
 import { auth, db } from "../filebase";
 import { addDoc, collection } from "firebase/firestore";
+import { FileChangeHandle } from "../utils/util";
 const Form = styled.form`
   display: flex;
   flex-direction: column;
@@ -60,23 +61,6 @@ export default function PostTweetForm() {
   const [tweet, setTweet] = useState("");
   const [file, setFile] = useState<string | null>(null);
 
-  const FileChangeHandle = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    onFileLoad: (fileData: string) => void
-  ) => {
-    const { files } = e.target;
-    if (files && files.length === 1) {
-      const { files } = e.target;
-      if (files && files.length === 1) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const result = reader.result as string;
-          onFileLoad(result);
-        };
-        reader.readAsDataURL(files[0]);
-      }
-    }
-  };
   const OnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setTweet(e.target.value);
   };

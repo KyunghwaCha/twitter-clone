@@ -52,7 +52,7 @@ export default function Layout() {
   return (
     <Wrapper>
       <Menu>
-        <Link to="">
+        <Link to="/profile">
           <MenuItem>
             <svg
               fill="currentColor"
@@ -64,7 +64,7 @@ export default function Layout() {
             </svg>
           </MenuItem>
         </Link>
-        <Link to="">
+        <Link to="/">
           <MenuItem>
             <svg
               fill="currentColor"
