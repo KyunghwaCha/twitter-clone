@@ -5,11 +5,15 @@ import { FileChangeHandle } from "../utils/util";
 import {
   collection,
   doc,
+  limit,
   onSnapshot,
+  orderBy,
   query,
   setDoc,
   where,
 } from "firebase/firestore";
+import type { ITweet } from "../components/timeline";
+import Tweet from "../components/tweet";
 
 const Wrapper = styled.div`
   display: flex;
@@ -40,10 +44,17 @@ const AvatarInput = styled.input`
 const Name = styled.span`
   font-size: 22px;
 `;
+const Tweets = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+`;
 
 export default function Profile() {
   const user = auth.currentUser;
   const [avatar, setAvatar] = useState("");
+  const [tweets, setTweet] = useState<ITweet[]>([]);
 
   useEffect(() => {
     const profileQuery = query(
@@ -51,13 +62,37 @@ export default function Profile() {
       where("userId", "==", user?.uid)
     );
 
+    const tweetQuery = query(
+      collection(db, "tweets"),
+      where("userId", "==", user?.uid),
+      orderBy("createdAt", "desc"),
+      limit(25)
+    );
+
     const unsubscribe = onSnapshot(profileQuery, (snapshot) => {
       if (snapshot.empty) return;
       const { imgSrc } = snapshot.docs[0].data();
       setAvatar(imgSrc);
     });
+
+    const unsubscribe2 = onSnapshot(tweetQuery, (snapshot) => {
+      const tweets = snapshot.docs.map((doc) => {
+        const { tweet, createdAt, userId, username, fileData } = doc.data();
+        return {
+          tweet,
+          createdAt,
+          userId,
+          username,
+          fileData,
+          id: doc.id,
+        };
+      });
+      setTweet(tweets);
+    });
+
     return () => {
       unsubscribe();
+      unsubscribe2();
     };
   }, []);
 
@@ -108,6 +143,11 @@ export default function Profile() {
         accept="image/*"
       />
       <Name>{user?.displayName ?? "Anonymous"}</Name>
+      <Tweets>
+        {tweets.map((tweet) => (
+          <Tweet key={tweet.id} {...tweet} />
+        ))}
+      </Tweets>
     </Wrapper>
   );
 }
