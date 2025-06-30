@@ -3,6 +3,7 @@ import type { ITweet } from "./timeline";
 import { auth, db } from "../filebase";
 import { deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { useState } from "react";
+import ReplyForm from "./reply-form";
 
 const Wrapper = styled.div`
   display: grid;
@@ -54,6 +55,10 @@ const MyPayload = styled.textarea`
   }
 `;
 
+const BtnDiv = styled.div`
+  display: flex;
+`;
+
 const DeleteButton = styled.button`
   margin: 0 5px;
   background-color: tomato;
@@ -80,6 +85,12 @@ const EditButton = styled.button`
   cursor: pointer;
 `;
 
+const ReplyButton = styled.div`
+  display: flex;
+  width: 30px;
+  height: 30px;
+`;
+
 export default function Tweet({
   username,
   tweet,
@@ -88,6 +99,7 @@ export default function Tweet({
   id,
 }: ITweet) {
   const user = auth.currentUser;
+  const [isReply, setIsReply] = useState(false);
   const onDelete = async () => {
     const ok = confirm("정말로 삭제하시겠습니까?");
     if (!ok || user?.uid !== userId) return;
@@ -112,6 +124,10 @@ export default function Tweet({
     setEditTweet(e.target.value);
   };
 
+  const onReplyBtnClick = () => {
+    setIsReply((current) => !current);
+  };
+
   const [editTweet, setEditTweet] = useState(tweet);
   return (
     <Wrapper>
@@ -122,12 +138,30 @@ export default function Tweet({
         ) : (
           <Payload>{tweet}</Payload>
         )}
-        {user?.uid === userId ? (
-          <div>
-            <EditButton onClick={onEdit}>Edit</EditButton>
-            <DeleteButton onClick={onDelete}>Delete</DeleteButton>
-          </div>
-        ) : null}
+        <BtnDiv>
+          {user?.uid === userId ? (
+            <>
+              <EditButton onClick={onEdit}>Edit</EditButton>
+              <DeleteButton onClick={onDelete}>Delete</DeleteButton>
+            </>
+          ) : null}
+          <ReplyButton onClick={onReplyBtnClick}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3"
+              />
+            </svg>
+          </ReplyButton>
+        </BtnDiv>
+        {isReply ? <ReplyForm docId={id} /> : null}
       </Column>
       <Column>{fileData ? <Photo src={fileData} /> : null}</Column>
     </Wrapper>
