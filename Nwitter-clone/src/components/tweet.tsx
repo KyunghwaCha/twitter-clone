@@ -1,9 +1,19 @@
 import styled from "styled-components";
 import type { ITweet } from "./timeline";
 import { auth, db } from "../filebase";
-import { deleteDoc, doc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { useState } from "react";
 import ReplyForm from "./reply-form";
+import RepliesList from "./replies-list";
 
 const Wrapper = styled.div`
   display: grid;
@@ -91,6 +101,12 @@ const ReplyButton = styled.div`
   height: 30px;
 `;
 
+interface repliesListForm {
+  userName: string;
+  comment: string;
+  createdAt: number;
+}
+
 export default function Tweet({
   username,
   tweet,
@@ -100,6 +116,7 @@ export default function Tweet({
 }: ITweet) {
   const user = auth.currentUser;
   const [isReply, setIsReply] = useState(false);
+  const [replyList, setReplyList] = useState<repliesListForm[]>([]);
   const onDelete = async () => {
     const ok = confirm("정말로 삭제하시겠습니까?");
     if (!ok || user?.uid !== userId) return;
@@ -128,6 +145,33 @@ export default function Tweet({
     setIsReply((current) => !current);
   };
 
+  const getRepliesList = () => {
+    const replyQuery = query(
+      collection(db, "replies"),
+      where("docId", "==", id),
+      orderBy("createdAt", "desc")
+    );
+
+    const unsubscribe = onSnapshot(replyQuery, (snapshot) => {
+      const replies = snapshot.docs.map((reply) => {
+        const { comment, userName, createdAt } = reply.data();
+        return {
+          comment,
+          userName,
+          createdAt,
+        };
+      });
+      setReplyList(replies);
+    });
+    return () => {
+      unsubscribe();
+    };
+  };
+
+  useState(() => {
+    getRepliesList();
+  }, [replyList]);
+
   const [editTweet, setEditTweet] = useState(tweet);
   return (
     <Wrapper>
@@ -150,18 +194,20 @@ export default function Tweet({
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
-              stroke-width="1.5"
               stroke="currentColor"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3"
-              />
+              <path d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
             </svg>
           </ReplyButton>
         </BtnDiv>
         {isReply ? <ReplyForm docId={id} /> : null}
+        {replyList.map((reply) => (
+          <RepliesList
+            key={reply.createdAt}
+            userName={reply.userName}
+            comment={reply.comment}
+          />
+        ))}
       </Column>
       <Column>{fileData ? <Photo src={fileData} /> : null}</Column>
     </Wrapper>

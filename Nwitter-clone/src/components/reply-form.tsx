@@ -40,11 +40,11 @@ const SubmitButton = styled.button`
   cursor: pointer;
 `;
 
-interface ReplyFormProps {
+interface ReplyForm {
   docId: string;
 }
 
-export default function ReplyForm({ docId }: ReplyFormProps) {
+export default function ReplyForm({ docId }: ReplyForm) {
   const [comment, setComment] = useState("");
   const user = auth.currentUser;
   const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
